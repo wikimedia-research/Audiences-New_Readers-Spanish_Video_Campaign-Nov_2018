@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Chelsy Xie" />
+
+<meta name="date" content="2019-04-03" />
+
+<title>Understand the impact of video campaign on traffic to Spanish Wikipedia from Mexico</title>
+
+<script src="index_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="index_files/bootstrap-3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+<script src="index_files/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script src="index_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="index_files/navigation-1.1/tabsets.js"></script>
+<script src="index_files/navigation-1.1/codefolding.js"></script>
+<link href="index_files/magnific-popup-1.1.0/magnific-popup.css" rel="stylesheet" />
+<script src="index_files/magnific-popup-1.1.0/jquery.magnific-popup.min.js"></script>
+<link href="index_files/readthedown-0.1/readthedown.css" rel="stylesheet" />
+<script src="index_files/readthedown-0.1/readthedown.js"></script>
+<link href="index_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="index_files/tocify-1.9.1/jquery.tocify.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+<div id="content" data-toggle="wy-nav-shift">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+<nav id="nav-top" role="navigation" aria-label="top navigation">
+    <a role="button" href="#" data-toggle="wy-nav-top"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
+</nav>
+
+
+<div id="header">
+<h1 class="title">Understand the impact of video campaign on traffic to Spanish Wikipedia from Mexico</h1>
+</div>
+
+
+<div id="table-of-contents">
+    <h2><a href="#content">Understand the impact of video campaign on traffic to Spanish Wikipedia from Mexico</a></h2>
+    <div id="text-table-of-contents">
+      <ul>
+      <li><a href="#background"><span class="toc-section-number">1</span> Background</a></li>
+      <li><a href="#data"><span class="toc-section-number">2</span> Data</a></li>
+      <li><a href="#exploratory-data-analysis"><span class="toc-section-number">3</span> Exploratory data analysis</a></li>
+      <li><a href="#methods"><span class="toc-section-number">4</span> Methods</a><ul>
+      <li><a href="#test-and-control-series"><span class="toc-section-number">4.1</span> Test and control series</a></li>
+      <li><a href="#model-selection"><span class="toc-section-number">4.2</span> Model selection</a></li>
+      </ul></li>
+      <li><a href="#results"><span class="toc-section-number">5</span> Results</a><ul>
+      <li><a href="#page-views"><span class="toc-section-number">5.1</span> Page Views</a></li>
+      <li><a href="#unique-devices"><span class="toc-section-number">5.2</span> Unique Devices</a></li>
+      </ul></li>
+      <li><a href="#reference"><span class="toc-section-number">6</span> Reference</a><ul>
+      <li><a href="#reading"><span class="toc-section-number">6.1</span> Reading</a></li>
+      <li><a href="#software"><span class="toc-section-number">6.2</span> Software</a></li>
+      </ul></li>
+      <li><a href="#appendix"><span class="toc-section-number">7</span> Appendix</a><ul>
+      <li><a href="#graphs-from-exploratory-data-analysis"><span class="toc-section-number">7.1</span> Graphs from exploratory data analysis</a></li>
+      </ul></li>
+      </ul>
+    </div>
+</div>
+
+<div id="main">
+<script type="text/javascript">
+$( function() {
+  /* Lets the user click on the images to view them in full resolution. */
+  $( "img" ).wrap( function() {
+    var link = $( '<a/>' );
+    link.attr( 'href', $( this ).attr( 'src' ));
+    link.attr( 'target', '_blank' );
+    return link;
+  } );
+} );
+</script>
+<h2>
+Executive Summary
+</h2>
+<p>To improve the recognition of Wikipedia and the understanding of its uses in Mexico, the Wikimedia Foundation started a video campaign to explain and promote Spanish Wikipedia. On November 15 2018, we published and promoted the Superdotada video on digital channels targeting Mexico, which was live for a month and gathered more than 5.3 million views.</p>
+<p>In this analysis, we use Bayesian structural time series models to model Spanish Wikipedia page views and unique devices from Mexico, and estimate the causal impact of the video campaign. Our models did not detect any significant impact on the page views and unique devices, nor in the subset of these traffic metrics – externally referred page views and first-time visit unique devices. Overall, given our models show good predictive power in cross validation, we don’t think the video campaign successfully increase the Mexican traffic to Spanish Wikipedia.</p>
+<p style="text-align: center;">
+{ <a href="https://phabricator.wikimedia.org/T215995">Phabricator Task</a> | <a href="https://github.com/wikimedia-research/Audiences-New_Readers-Spanish_Video_Campaign-Nov_2018">Analysis Codebase</a> }
+</p>
+<div id="background" class="section level1">
+<h1><span class="header-section-number">1</span> Background</h1>
+<p>According to the New Readers research in October 2016, about 55% of Mexicans surveyed say they have never heard of Wikipedia<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Meanwhile, trust in the Wikipedia brand is low in Mexico. In April 2018, the Wikimedia Foundation and Wikimedia Mexico began collaborating to reach “New Readers” in Mexico (see the <a href="https://meta.wikimedia.org/wiki/New_Readers/Raising_Awareness_in_Mexico">program page</a>). The goal is to improve recognition of Wikipedia and understanding of its uses among Mexican internet users.</p>
+<p>To explain and promote Spanish Wikipedia (es-wiki), Wikimedia foundation started a video campaign in November 2018. On November 15 2018, we published and promoted the <a href="https://meta.wikimedia.org/wiki/File:Wikipedia_promotional_video_-_Superdotada.ogv">Superdotada video</a> mainly on YouTube and Facebook targeting Mexican internet users who have not heard of Wikipedia. The promotion ran till December 16 and the video gathered 2.3M and 3M views on YouTube and Facebook respectively (which comprise &gt;96% of all video views).</p>
+<p>Under the video, we included a link to a custom <a href="https://bienvenida.wikimedia.org/">landing page</a>, which describes the usage of Wikipedia and includes links to the <a href="https://es.wikipedia.org/wiki/M%C3%BAsica_de_Am%C3%A9rica_Latina">“Latin American Music” article</a>, the <a href="https://es.wikipedia.org/wiki/Wikipedia:Portada">Spanish Wikipedia main page</a> and the Wikipedia apps download. Please see <a href="https://meta.wikimedia.org/wiki/New_Readers/Raising_Awareness_in_Mexico/Short-term_Impacts">this wiki page</a> for the findings regarding the short-term impacts of the Mexico video campaign to the custom landing page and then onto Wikipedia via that landing page. In this report, we will focus on analyzing the long-term impact of this video campaign on the traffic to Spanish Wikipedia from Mexico.</p>
+</div>
+<div id="data" class="section level1">
+<h1><span class="header-section-number">2</span> Data</h1>
+<p>In order to measure the traffic to Spanish Wikipedia from Mexico, we chose the <a href="https://meta.wikimedia.org/wiki/Research:Page_view">pageviews</a> and <a href="https://meta.wikimedia.org/wiki/Research:Unique_Devices">unique devices</a> of Spanish Wikipedia as our test metrics, aggregated by country. Additionally, we also looked at the impressions and clickthroughs to Spanish Wikipedia on Google search result pages from Mexico (data was obtained from <a href="https://en.wikipedia.org/wiki/Google_Search_Console">Google search console</a>).</p>
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1><span class="header-section-number">3</span> Exploratory data analysis</h1>
+<p>Firstly, we look at the general trend of page views and unique devices of Spanish Wikipedia from Mexico. The following graphs of monthly page views and unique devices show that while the number of unique devices is relatively stable with a slight increase overtime, the page views drop year over year. This is an indicator of reading habit change and further investigation is needed.</p>
+<p><img src="figures/eswiki_pv.png" /></p>
+<p><img src="figures/eswiki_mexico_ud.png" /></p>
+<p>We also notice an interesting pattern in daily usage. The following graph of daily unique devices by country shows that users from Spain read more on the mobile devices during the weekends and they read more on desktop during weekdays, which is a pattern we saw consistently on other wikis as well. However, in Mexico and other Spanish speaking countries <a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>, the usage pattern on desktop and mobile are very similar: high during weekdays and low during weekends. We see the same behaviors in page views data as well (see the <a href="#graphs-from-exploratory-data-analysis">appendix</a>). Possible explanations for this unusual pattern are:</p>
+<ul>
+<li>A lot of desktop users in these countries read the mobile version of the page;</li>
+<li>A lot of mobile devices are used as “desktop” – for example, students are more likely to use tablet than laptop, people are more likely to use tablet for their work, etc;</li>
+<li>Users in these countries use Wikipedia for different purposes – previous research<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> show that the main driver for mobile users to read Wikipedia is conversations, and perhaps users in these countries don’t see Wikipedia as a useful source for their topics.</li>
+</ul>
+<p>Further research is needed, and the result may provide better suggestions about how to approach readers in these Spanish speaking countries.</p>
+<p><img src="figures/eswiki_ud_bycountries.png" /></p>
+<p>Lastly, from the breakdowns by wiki, the impressions and clickthroughs to Spanish Wikipedia on Google search result pages from Mexico (see the <a href="#graphs-from-exploratory-data-analysis">appendix</a>), and the graphs above, we don’t see any bumps during and after the video campaign.</p>
+</div>
+<div id="methods" class="section level1">
+<h1><span class="header-section-number">4</span> Methods</h1>
+<p>In the last section, we didn’t see any significant bumps in traffic after the video campaigns, but it’s possible that the campaign had some long term impact on the traffic to Spanish Wikipedia, e.g. Spanish speaking internet users from Mexico are more likely to clickthrough when they see Wikipedia on their search results pages. This kind of long term impact is what we care about most in this project – improving the recognition of Wikipedia and the understanding of its uses.</p>
+<p>In order to assess this hypothesis, we adopted a model-based approach to estimate the causal effect of the campaign on the page views and unique devices time series. With our test time series (page views and unique devices in Mexico) as the response variable, and a set of control time series (page views and unique devices in non-affected regions or non-affected wikis) as predictors, we constructed a <a href="https://en.wikipedia.org/wiki/Bayesian_structural_time_series">Bayesian structural time series model</a>. This model was then used to predict the counterfactual, i.e., how the response metric would have evolved after the intervention if the intervention had never occurred. We then calculated the difference between the synthetic counterfactual series and the observed test series for the post-intervention period (we choose 10 weeks in this analysis: 32 days of campaign and 38 days after the campaign) – which is the estimated impact of the campaign – and gauge its uncertainty by computing the posterior interval. We used the R packages <a href="https://CRAN.R-project.org/package=bsts">“bsts”</a> (Scott et al., 2018) and <a href="https://CRAN.R-project.org/package=CausalImpact">“CausalImpact”</a> (Brodersen et al., 2017)<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> for modeling and inference.</p>
+<div id="test-and-control-series" class="section level2">
+<h2><span class="header-section-number">4.1</span> Test and control series</h2>
+<p>The approach we described above is based on the following assumptions:</p>
+<ul>
+<li>There is a set of control time series that were themselves not affected by the intervention. If they were, we might falsely under- or overestimate the true effect. Or we might falsely conclude that there was an effect even though in reality there wasn’t.</li>
+<li>The relationship between covariates and treated time series, as established during the pre-period, remains stable throughout the post-period.</li>
+</ul>
+<p>Therefore, we used the Spanish Wikipedia page views and unique devices from Mexico as the test series, and used page views and unique devices from other countries <a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> to Spanish Wikipedia and other wikis<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> as the control series. We tried both including and excluding the page views and unique devices to other wikis from Mexico in the set of control series to see how they affect the model performance and the significance of the impact, although including these series may violate the first assumption above because if the video campaign affect the brand awareness of Wikipedia the impact would likely be revealed on other wikis’ traffic from the target region as well. We also analyzed a subset of the test and controls series – the page views referred by search engines and external websites and the unique devices that visit our sites for the first time in 30 days (without cookies).</p>
+<p>The authors of the <em>CausalImpact</em> library we use for estimating the models suggest using 3-50 covariates <a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a>. Thus, for models in this work where we have hundreds of control series—e.g., many combinations of different regions and language editions—we use correlation and <a href="https://en.wikipedia.org/wiki/Dynamic_time_warping">dynamic time warping</a> (DTW) algorithms with pre-intervention data to prescreen and trim the list of control series before feeding them into the BSTS model.</p>
+</div>
+<div id="model-selection" class="section level2">
+<h2><span class="header-section-number">4.2</span> Model selection</h2>
+<p>Before fitting bayesian structural time series model on the whole pre-intervention data set, we perform cross validation to choose the best model configuration with time series before the intervention. We used 10-fold cross validation with 10 weeks in each fold, then compute and compare the <a href="https://en.wikipedia.org/wiki/Mean_absolute_percentage_error">mean average percent error (MAPE)</a>, <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">root mean square error (RMSE)</a> and <a href="https://en.wikipedia.org/wiki/Coefficient_of_determination">R squared</a>. To prevent the model from picking up spurious impact, we also computed the imaginary causal impact during validation period. We compared the estimated impact and its credible interval (the smaller the better), and we expected not to find a significant effect in the validation period, i.e., counterfactual estimates and actual data should agree reasonably closely.</p>
+<p>We tried different combinations of the following model configuration:</p>
+<ul>
+<li><strong>Trend model</strong>: For the trend component, we tried 1) local level trend 2) local linear trend, 3) semi-local linear trend, 4) a static intercept term.</li>
+<li><strong>Pre-intervention period</strong>: Since there might be different factors influencing the relationship between covariates and treated time series, we also explore different pre-intervention period length: 12 weeks, 18 weeks, 183 days, 400 days, 600 days and 800 days.</li>
+</ul>
+<p>Besides the above model parameters selected via grid-search, for each model in this work, we include a weekly and a monthly annual seasonality component, and a regression-based holiday component (including the following holidays: Holy week, Christmas and New year).</p>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1><span class="header-section-number">5</span> Results</h1>
+<p>For both page views and unique devices of Spanish Wikipedia from Mexico, we do not detect a significant change during or after the campaign.</p>
+<div id="page-views" class="section level2">
+<h2><span class="header-section-number">5.1</span> Page Views</h2>
+<p>For Spanish Wikipedia page views from Mexico, the best model has a local level trend with page views of other wikis<a href="#fn8" class="footnoteRef" id="fnref8"><sup>8</sup></a> from Mexico included. The pre-intervention period is 183 days, which means the time series starts on 16 May 2018 and includes daily page view data through 23 January 2019, where the intervention occurred on 15 November 2018. The validation statistics associated with the model provide an indication of how effective the model was at predicting the pre-intervention time series. With 10-fold cross validation and prediction evaluated on 10 weeks of daily page views (from the end of the pre-intervention period), the holdout mean absolute percentage error (MAPE) of this model is 7.38%.</p>
+<p>In the plot below, the first panel shows the data (black solid line) and counterfactual prediction (blue dashed line) for the post-intervention period. The second panel shows the difference between observed data and counterfactual predictions. This is the point-wise causal effect, as estimated by the model. The third panel adds up the point-wise contributions from the second panel, resulting in a plot of the cumulative effect of the intervention. Shaded areas indicate 95% credible intervals. This graph shows that no significant impact on page views was detected during the campaign and in 38 days after the campaign ended. Page views of Spanish Wikibooks from Mexico and page views of Spanish Wikipedia from Ecuador are the most predictive control series in the model, with average standardized coefficients of 0.58 and 0.36 respectively. The posterior probabilities that their coefficients are different from zero are greater than 95%.</p>
+<p><img src="figures/include_mx/eswiki_pv_impact.png" /></p>
+<p>We also tried excluding Mexico page views of other wikis from the control series set. The average holdout MAPE from cross-validation is 10.57%, indicating the model performance is not as good as the previous one. And no significant impact is detected using this model neither.</p>
+<p>For Spanish Wikipedia external referred page views from Mexico, the best model has a local level trend and the pre-intervention period is 400 days. The average holdout MAPE from cross-validation is 7.15%. This following graph shows that no significant impact on externally referred page views was detected following the intervention. Similarly, excluding Mexico externally-referred page views of other wikis from the control series set results in a worse model (MAPE = 10.09%), and no significant impact is detected using this model neither.</p>
+<p><img src="figures/include_mx/eswiki_external_pv_impact.png" /></p>
+</div>
+<div id="unique-devices" class="section level2">
+<h2><span class="header-section-number">5.2</span> Unique Devices</h2>
+<p>For Spanish Wikipedia unique devices from Mexico, the best model has a local level trend and the pre-intervention period is 600 days, which means the time series starts on 25 March 2017 and includes daily unique devices counts through 23 January 2019, where the intervention occurred on 15 November 2018. The average holdout MAPE from cross-validation is 5%. This following graph shows that no significant impact on unique devices was detected during the campaign and in 38 days after the campaign ended. Unique devices of es-wiki from Venezuela and Dominican Republic, unique devices of Spanish Wiktionary from Mexico and Dominican Republic, unique devices of Spanish Wikibooks from Mexico, are the most predictive control series in the model, with average standardized coefficients of 0.1, 0.29, 0.6, -0.26 and 0.37 respectively. The posterior probabilities that their coefficients are different from zero are greater than 95%. Similarly, excluding Mexico unique devices of other wikis from the control series set results in a worse model (MAPE = 7.83%), and no significant impact is detected using this model neither.</p>
+<p><img src="figures/include_mx/eswiki_ud_impact.png" /></p>
+<p>For Spanish Wikipedia first-time visit unique devices in 30 days from Mexico, the best model has a local level trend and the pre-intervention period is 600 days. The average holdout MAPE from cross-validation is 4.48%. This following graph shows that no significant impact on first-time visit unique devices was detected following the intervention. Similarly, excluding Mexico first-time visit unique devices of other wikis from the control series set results in a worse model (MAPE = 7.95%), and no significant impact is detected using this model neither.</p>
+<p><img src="figures/include_mx/eswiki_first_visit_ud_impact.png" /></p>
+<p>Last but not least, further research and model tuning is needed to improve the accuracy of the estimation. See the <a href="https://wikimedia-research.github.io/Audiences-New_Readers-Hindi_Video_Campagin-April_2018/#discussion">discussion part of the Hindi Wikipedia report</a> in which we used the same methodologies.</p>
+</div>
+</div>
+<div id="reference" class="section level1">
+<h1><span class="header-section-number">6</span> Reference</h1>
+<div id="reading" class="section level2">
+<h2><span class="header-section-number">6.1</span> Reading</h2>
+<ol>
+<li id="ref-1">
+Scott, S. L., and Varian, H. R. (2014). Predicting the present with bayesian structural time series. International Journal of Mathematical Modelling and Numerical Optimisation, 5(1/2), 4. <a href="http://doi.org/10.1504/ijmmno.2014.059942" class="uri">http://doi.org/10.1504/ijmmno.2014.059942</a>
+</li>
+<li id="ref-2">
+Brodersen, K. H., Gallusser, F., and Koehler, J. (2015). Inferring causal impact using Bayesian structural time-series models. The Annals of Applied Statistics. <a href="http://doi.org/10.1214/14-AOAS788" class="uri">http://doi.org/10.1214/14-AOAS788</a>, <a href="http://research.google.com/pubs/pub41854.html" class="uri">http://research.google.com/pubs/pub41854.html</a>
+</li>
+<li id="ref-3">
+Larsen, K. (2016, January 13). Making Causal Impact Analysis Easy [Blog post]. Retrieved from <a href="http://multithreaded.stitchfix.com/blog/2016/01/13/market-watch/" class="uri">http://multithreaded.stitchfix.com/blog/2016/01/13/market-watch/</a>
+</li>
+<li id="ref-4">
+Larsen, K. (2016, April 21). Sorry ARIMA, but I’m Going Bayesian [Blog post]. Retrieved from <a href="http://multithreaded.stitchfix.com/blog/2016/04/21/forget-arima/" class="uri">http://multithreaded.stitchfix.com/blog/2016/04/21/forget-arima/</a>
+</li>
+<li id="ref-5">
+Scott, S. L. (2017, July 11). Fitting Bayesian structural time series with the bsts R package [Blog post]. Retrieved from <a href="http://www.unofficialgoogledatascience.com/2017/07/fitting-bayesian-structural-time-series.html" class="uri">http://www.unofficialgoogledatascience.com/2017/07/fitting-bayesian-structural-time-series.html</a>
+</li>
+</ol>
+</div>
+<div id="software" class="section level2">
+<h2><span class="header-section-number">6.2</span> Software</h2>
+<ol start="6" style="list-style-type: decimal">
+<li id="ref-6">
+R Core Team (2018). <em>R: A Language and Environment for StatisticalComputing</em>. R Foundation for Statistical Computing, Vienna,Austria. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>
+</li>
+<li id="ref-7">
+Scott SL (2018). <em>bsts: Bayesian Structural Time Series</em>. Rpackage version 0.8.0, <a href="https://CRAN.R-project.org/package=bsts" class="uri">https://CRAN.R-project.org/package=bsts</a>
+</li>
+<li id="ref-8">
+Giorgino T (2009). “Computing and Visualizing Dynamic Time WarpingAlignments in R: The dtw Package.” <em>Journal of StatisticalSoftware</em>, <em>31</em>(7), 1-24. <a href="http://www.jstatsoft.org/v31/i07/" class="uri">http://www.jstatsoft.org/v31/i07/</a>
+</li>
+<li id="ref-9">
+Tormene P, Giorgino T, Quaglini S, Stefanelli M (2008). “MatchingIncomplete Time Series with Dynamic Time Warping: An Algorithm andan Application to Post-Stroke Rehabilitation.” <em>ArtificialIntelligence in Medicine</em>, <em>45</em>(1), 11-34. <a href="doi:10.1016/j.artmed.2008.11.007" class="uri">doi:10.1016/j.artmed.2008.11.007</a> (URL:<a href="http://doi.org/10.1016/j.artmed.2008.11.007" class="uri">http://doi.org/10.1016/j.artmed.2008.11.007</a>).
+</li>
+<li id="ref-10">
+Brodersen KH, Gallusser F, Koehler J, Remy N, Scott SL (2014).“Inferring causal impact using Bayesian structural time-seriesmodels.” <em>Annals of Applied Statistics</em>, <em>9</em>, 247-274. <a href="http://research.google.com/pubs/pub41854.html" class="uri">http://research.google.com/pubs/pub41854.html</a>
+</li>
+<li id="ref-11">
+Wickham H (2016). <em>ggplot2: Elegant Graphics for Data Analysis</em>.Springer-Verlag New York. ISBN 978-3-319-24277-4, <a href="http://ggplot2.org" class="uri">http://ggplot2.org</a>
+</li>
+<li id="ref-12">
+Allaire J, Xie Y, McPherson J, Luraschi J, Ushey K, Atkins A,Wickham H, Cheng J, Chang W (2018). <em>rmarkdown: Dynamic Documentsfor R</em>. R package version 1.10, <a href="https://CRAN.R-project.org/package=rmarkdown" class="uri">https://CRAN.R-project.org/package=rmarkdown</a>
+</li>
+<li id="ref-13">
+Xie Y (2018). <em>knitr: A General-Purpose Package for Dynamic ReportGeneration in R</em>. R package version 1.20, <a href="https://yihui.name/knitr/" class="uri">https://yihui.name/knitr/</a>
+</li>
+<li id="ref-14">
+Xie Y (2015). <em>Dynamic Documents with R and knitr</em>, 2nd edition.Chapman and Hall/CRC, Boca Raton, Florida. ISBN 978-1498716963, <a href="https://yihui.name/knitr/" class="uri">https://yihui.name/knitr/</a>
+</li>
+<li id="ref-15">
+Xie Y (2014). “knitr: A Comprehensive Tool for ReproducibleResearch in R.” In Stodden V, Leisch F, Peng RD (eds.),<em>Implementing Reproducible Computational Research</em>. Chapman andHall/CRC. ISBN 978-1466561595, <a href="http://www.crcpress.com/product/isbn/9781466561595" class="uri">http://www.crcpress.com/product/isbn/9781466561595</a>
+</li>
+</ol>
+</div>
+</div>
+<div id="appendix" class="section level1">
+<h1><span class="header-section-number">7</span> Appendix</h1>
+<div id="graphs-from-exploratory-data-analysis" class="section level2">
+<h2><span class="header-section-number">7.1</span> Graphs from exploratory data analysis</h2>
+<p><img src="figures/eswiki_pv_bycountries.png" /></p>
+<p><img src="figures/pv_mexico_bywiki.png" /></p>
+<p><img src="figures/ud_mexico_bywiki.png" /></p>
+<p><img src="figures/gsc_eswiki.png" /></p>
+<p><img src="figures/gsc_ctr_eswiki.png" /></p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://meta.wikimedia.org/wiki/New_Readers/Raising_Awareness_in_Mexico" class="uri">https://meta.wikimedia.org/wiki/New_Readers/Raising_Awareness_in_Mexico</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Here we include top 10 countries with most page views to Spanish Wikipedia, and top 10 countries whose official language is Spanish. See <a href="https://en.wikipedia.org/wiki/List_of_countries_where_Spanish_is_an_official_language" class="uri">https://en.wikipedia.org/wiki/List_of_countries_where_Spanish_is_an_official_language</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://cs.stanford.edu/people/jure/pubs/wikipedia-www17.pdf" class="uri">https://cs.stanford.edu/people/jure/pubs/wikipedia-www17.pdf</a><a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>We make some changes to the package to use it with our custom BSTS model. See <a href="https://github.com/chelsyx/CausalImpact" class="uri">https://github.com/chelsyx/CausalImpact</a> .<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>Here we include top 10 countries with most page views to Spanish Wikipedia, and top 10 countries whose official language is Spanish. See <a href="https://en.wikipedia.org/wiki/List_of_countries_where_Spanish_is_an_official_language" class="uri">https://en.wikipedia.org/wiki/List_of_countries_where_Spanish_is_an_official_language</a><a href="#fnref5">↩</a></p></li>
+<li id="fn6"><p>Here we include the top 5 wikimedia projects in Mexico with the most page views.<a href="#fnref6">↩</a></p></li>
+<li id="fn7"><p><a href="https://stats.stackexchange.com/questions/162930/causalimpact-should-i-use-more-than-one-control/163554#163554" class="uri">https://stats.stackexchange.com/questions/162930/causalimpact-should-i-use-more-than-one-control/163554#163554</a><a href="#fnref7">↩</a></p></li>
+<li id="fn8"><p>Here we include the top 5 wikimedia projects in Mexico with the most page views.<a href="#fnref8">↩</a></p></li>
+</ol>
+</div>
+</div>
+
+
+</div>
+
+<div id="postamble" data-toggle="wy-nav-shift" class="status">
+<p class="author"><span class="glyphicon glyphicon-user"></span> Chelsy Xie</p>
+<p class="date"><span class="glyphicon glyphicon-calendar"></span> 03 April 2019</p>
+</div>
+
+
+<script>
+$(document).ready(function () {
+ 	  });
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
